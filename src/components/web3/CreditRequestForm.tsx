@@ -32,7 +32,7 @@ export const CreditRequestForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTier) return;
+    if (!selectedTier || !address) return;
     
     writeRequestCredit({
       address: CONTRACTS.LendingPool.address as `0x${string}`,

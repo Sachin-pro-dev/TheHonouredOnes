@@ -26,6 +26,7 @@ import DepositForm from "@/components/web3/DepositForm";
 import WithdrawForm from "@/components/web3/WithdrawForm";
 import { useAccount } from "wagmi";
 import { formatUnits } from "viem";
+import { formatUSDC } from "@/lib/contracts";
 
 const Dashboard = () => {
   const { address } = useAccount();
@@ -33,16 +34,14 @@ const Dashboard = () => {
     usdcBalance, 
     poolStats, 
     userVoucherInfo, 
-    faucetMockUSDC, 
-    isLoading 
+    userDeposits,
+    claimFaucet, 
+    isFaucetLoading 
   } = useWeb3Integration();
 
   const formatCurrency = (value: bigint | undefined) => {
     if (!value) return "0.00";
-    return Number(formatUnits(value, 6)).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    return formatUSDC(value);
   };
 
   const creditUtilization = userVoucherInfo ? 
@@ -53,7 +52,7 @@ const Dashboard = () => {
       title: "Get Test USDC",
       description: "Claim free tokens for testing",
       icon: Plus,
-      action: faucetMockUSDC,
+      action: claimFaucet,
       variant: "default" as const,
       gradient: "from-clen-green/20 to-clen-blue/20"
     },
@@ -136,7 +135,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold gradient-text">
-              ${formatCurrency(usdcBalance)}
+              ${usdcBalance}
             </div>
             <div className="flex items-center space-x-2 mt-2">
               <TrendingUp className="w-4 h-4 text-clen-green" />
@@ -264,9 +263,9 @@ const Dashboard = () => {
                     variant={action.variant}
                     size="sm"
                     className="glass-button border-white/20 hover:border-white/40 text-white hover:bg-white/10"
-                    disabled={isLoading}
+                    disabled={isFaucetLoading}
                   >
-                    {isLoading ? "Processing..." : "Execute"}
+                    {isFaucetLoading ? "Processing..." : "Execute"}
                   </Button>
                 ) : (
                   <Button 
@@ -299,13 +298,13 @@ const Dashboard = () => {
               <div className="glass rounded-lg p-4">
                 <div className="text-sm text-muted-foreground mb-1">Total Deposits</div>
                 <div className="text-2xl font-bold gradient-text">
-                  ${poolStats ? formatCurrency(poolStats.totalDeposits) : "0.00"}
+                  ${poolStats ? poolStats.totalDeposits : "0.00"}
                 </div>
               </div>
               <div className="glass rounded-lg p-4">
                 <div className="text-sm text-muted-foreground mb-1">Available Liquidity</div>
                 <div className="text-2xl font-bold text-clen-green">
-                  ${poolStats ? formatCurrency(poolStats.availableLiquidity) : "0.00"}
+                  ${poolStats ? poolStats.availableLiquidity : "0.00"}
                 </div>
               </div>
             </div>
@@ -313,13 +312,13 @@ const Dashboard = () => {
               <div className="glass rounded-lg p-4">
                 <div className="text-sm text-muted-foreground mb-1">Total Borrowed</div>
                 <div className="text-2xl font-bold text-clen-blue">
-                  ${poolStats ? formatCurrency(poolStats.totalBorrowed) : "0.00"}
+                  ${poolStats ? poolStats.totalBorrowed : "0.00"}
                 </div>
               </div>
               <div className="glass rounded-lg p-4">
                 <div className="text-sm text-muted-foreground mb-1">Total Repaid</div>
                 <div className="text-2xl font-bold text-clen-purple">
-                  ${poolStats ? formatCurrency(poolStats.totalRepaid) : "0.00"}
+                  ${poolStats ? poolStats.totalRepaid : "0.00"}
                 </div>
               </div>
             </div>
@@ -378,7 +377,7 @@ const Dashboard = () => {
             <CardDescription>Withdraw your deposited funds</CardDescription>
           </CardHeader>
           <CardContent>
-            <WithdrawForm />
+            <WithdrawForm userDeposits={userDeposits} />
           </CardContent>
         </Card>
       </div>

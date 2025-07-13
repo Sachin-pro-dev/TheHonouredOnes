@@ -5,15 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CONTRACTS, parseUSDC } from '@/lib/contracts';
+import { CONTRACTS, parseUSDC, formatUSDC } from '@/lib/contracts';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowUpFromLine, Loader2 } from 'lucide-react';
 
 interface WithdrawFormProps {
-  userDeposits: string;
+  userDeposits: bigint;
 }
 
-export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
+const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
   const { address } = useAccount();
   const { toast } = useToast();
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -36,7 +36,7 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) return;
+    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0 || !address) return;
     
     writeWithdraw({
       address: CONTRACTS.LendingPool.address as `0x${string}`,
@@ -47,8 +47,10 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
   };
 
   const handleMaxClick = () => {
-    setWithdrawAmount(userDeposits);
+    setWithdrawAmount(formatUSDC(userDeposits));
   };
+
+  const formattedDeposits = formatUSDC(userDeposits);
 
   return (
     <Card className="glass-strong">
@@ -61,7 +63,7 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
       <CardContent>
         <div className="mb-4 p-3 glass rounded-lg">
           <div className="text-sm text-muted-foreground">Available to Withdraw</div>
-          <div className="text-lg font-semibold text-clen-green">${userDeposits}</div>
+          <div className="text-lg font-semibold text-clen-green">${formattedDeposits}</div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,7 +75,7 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
                 type="number"
                 step="0.01"
                 min="0"
-                max={userDeposits}
+                max={formattedDeposits}
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
                 placeholder="0.00"
@@ -109,3 +111,5 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
     </Card>
   );
 };
+
+export default WithdrawForm;

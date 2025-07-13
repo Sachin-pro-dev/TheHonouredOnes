@@ -68,7 +68,7 @@ export const useWeb3Integration = () => {
   }, [isFaucetSuccess, toast, refetchUSDCBalance]);
 
   const claimFaucet = () => {
-    if (isConnected) {
+    if (isConnected && address) {
       writeFaucet({
         address: CONTRACTS.MockUSDC.address as `0x${string}`,
         abi: CONTRACTS.MockUSDC.abi,
@@ -89,11 +89,11 @@ export const useWeb3Integration = () => {
     userVoucherInfo: userVoucherInfo ? {
       voucherId: (userVoucherInfo as any)[0]?.toString(),
       tier: (userVoucherInfo as any)[1],
-      limit: formatUSDC((userVoucherInfo as any)[2]),
-      utilized: formatUSDC((userVoucherInfo as any)[3]),
-      debt: formatUSDC((userVoucherInfo as any)[4]),
+      limit: (userVoucherInfo as any)[2] as bigint,
+      utilized: (userVoucherInfo as any)[3] as bigint,
+      debt: (userVoucherInfo as any)[4] as bigint,
     } : null,
-    userDeposits: userDeposits ? formatUSDC(userDeposits as bigint) : '0.00',
+    userDeposits: userDeposits ? userDeposits as bigint : BigInt(0),
   };
 
   return {
