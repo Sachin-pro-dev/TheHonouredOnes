@@ -179,6 +179,6 @@ Loan: $10K | Tier: Gold | DeFi across 5 chains → CLen unified score
 
 
 
-### 🚀 “CLen is building the missing credit layer of Web3 — where your reputation, not your collateral, unlocks financial access.”
+### 🚀 “CLen is building the missing credit layer of Web3 — where your reputation, not your collateral, unlocks financial access”
 ```
 
