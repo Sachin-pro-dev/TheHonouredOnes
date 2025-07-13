@@ -13,8 +13,8 @@ interface WithdrawFormProps {
   userDeposits: bigint;
 }
 
-const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
-  const { address } = useAccount();
+export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
+  const { address, chain } = useAccount();
   const { toast } = useToast();
   const [withdrawAmount, setWithdrawAmount] = useState('');
 
@@ -36,13 +36,15 @@ const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0 || !address) return;
+    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0 || !address || !chain) return;
     
     writeWithdraw({
       address: CONTRACTS.LendingPool.address as `0x${string}`,
       abi: CONTRACTS.LendingPool.abi,
       functionName: 'withdraw',
       args: [parseUSDC(withdrawAmount)],
+      chain,
+      account: address,
     });
   };
 
@@ -111,5 +113,3 @@ const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
     </Card>
   );
 };
-
-export default WithdrawForm;

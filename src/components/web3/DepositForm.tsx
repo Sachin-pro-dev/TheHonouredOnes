@@ -9,8 +9,8 @@ import { CONTRACTS, parseUSDC } from '@/lib/contracts';
 import { useToast } from '@/hooks/use-toast';
 import { DollarSign, Loader2 } from 'lucide-react';
 
-const DepositForm = () => {
-  const { address } = useAccount();
+export const DepositForm = () => {
+  const { address, chain } = useAccount();
   const { toast } = useToast();
   const [depositAmount, setDepositAmount] = useState('');
 
@@ -61,7 +61,7 @@ const DepositForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!depositAmount || parseFloat(depositAmount) <= 0 || !address) return;
+    if (!depositAmount || parseFloat(depositAmount) <= 0 || !address || !chain) return;
 
     if (needsApproval) {
       writeApprove({
@@ -69,6 +69,8 @@ const DepositForm = () => {
         abi: CONTRACTS.MockUSDC.abi,
         functionName: 'approve',
         args: [CONTRACTS.LendingPool.address, parseUSDC(depositAmount)],
+        chain,
+        account: address,
       });
     } else {
       writeDeposit({
@@ -76,6 +78,8 @@ const DepositForm = () => {
         abi: CONTRACTS.LendingPool.abi,
         functionName: 'deposit',
         args: [parseUSDC(depositAmount)],
+        chain,
+        account: address,
       });
     }
   };
@@ -140,5 +144,3 @@ const DepositForm = () => {
     </Card>
   );
 };
-
-export default DepositForm;

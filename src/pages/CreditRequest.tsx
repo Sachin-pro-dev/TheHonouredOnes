@@ -13,6 +13,7 @@ import { Calculator, CreditCard, Zap, Shield, TrendingUp, Clock, DollarSign } fr
 import { useToast } from "@/hooks/use-toast";
 import { useWeb3Integration } from "@/hooks/useWeb3Integration";
 import { CreditRequestForm } from "@/components/web3/CreditRequestForm";
+import { formatUSDC } from "@/lib/contracts";
 
 const CreditRequest = () => {
   const [loanAmount, setLoanAmount] = useState([10000]);
@@ -62,6 +63,19 @@ const CreditRequest = () => {
     setIsApplying(false);
   };
 
+  // Helper function to safely get limit as number
+  const getCreditLimit = () => {
+    if (userVoucherInfo?.limit) {
+      return Number(formatUSDC(userVoucherInfo.limit));
+    }
+    return 5000;
+  };
+
+  // Helper function to safely format bigint values
+  const formatVoucherAmount = (amount: bigint) => {
+    return formatUSDC(amount);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -94,7 +108,7 @@ const CreditRequest = () => {
                   <Slider
                     value={loanAmount}
                     onValueChange={setLoanAmount}
-                    max={userVoucherInfo ? parseFloat(userVoucherInfo.limit) : 5000}
+                    max={getCreditLimit()}
                     min={100}
                     step={100}
                     className="w-full"
@@ -103,7 +117,7 @@ const CreditRequest = () => {
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>100 USDT</span>
                   <span className="text-2xl font-bold text-clen-green">{loanAmount[0].toLocaleString()} USDT</span>
-                  <span>{userVoucherInfo ? parseFloat(userVoucherInfo.limit).toLocaleString() : '5,000'} USDT</span>
+                  <span>{getCreditLimit().toLocaleString()} USDT</span>
                 </div>
               </div>
 
@@ -277,14 +291,16 @@ const CreditRequest = () => {
               <div className="flex justify-between">
                 <span className="text-sm text-white">Available Credit</span>
                 <span className="text-sm font-medium text-white">
-                  {userVoucherInfo ? `$${(parseFloat(userVoucherInfo.limit) - parseFloat(userVoucherInfo.utilized)).toFixed(2)}` : '875 USDT'}
+                  {userVoucherInfo ? 
+                    `$${formatVoucherAmount(userVoucherInfo.limit - userVoucherInfo.utilized)}` : 
+                    '875 USDT'}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-white">Current Utilization</span>
                 <span className="text-sm font-medium text-white">
                   {userVoucherInfo ? 
-                    `${((parseFloat(userVoucherInfo.utilized) / parseFloat(userVoucherInfo.limit)) * 100).toFixed(1)}%` : 
+                    `${((Number(formatVoucherAmount(userVoucherInfo.utilized)) / Number(formatVoucherAmount(userVoucherInfo.limit))) * 100).toFixed(1)}%` : 
                     '65%'}
                 </span>
               </div>

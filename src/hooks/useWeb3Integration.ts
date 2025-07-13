@@ -5,7 +5,7 @@ import { CONTRACTS, formatUSDC, parseUSDC } from '@/lib/contracts';
 import { useToast } from '@/hooks/use-toast';
 
 export const useWeb3Integration = () => {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
   const { toast } = useToast();
   
   // USDC Balance
@@ -68,11 +68,13 @@ export const useWeb3Integration = () => {
   }, [isFaucetSuccess, toast, refetchUSDCBalance]);
 
   const claimFaucet = () => {
-    if (isConnected && address) {
+    if (isConnected && address && chain) {
       writeFaucet({
         address: CONTRACTS.MockUSDC.address as `0x${string}`,
         abi: CONTRACTS.MockUSDC.abi,
         functionName: 'faucet',
+        chain,
+        account: address,
       });
     }
   };
@@ -99,6 +101,7 @@ export const useWeb3Integration = () => {
   return {
     isConnected,
     address,
+    chain,
     ...formattedData,
     claimFaucet,
     isFaucetLoading,

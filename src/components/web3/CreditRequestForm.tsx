@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CreditCard, Loader2 } from 'lucide-react';
 
 export const CreditRequestForm = () => {
-  const { address } = useAccount();
+  const { address, chain } = useAccount();
   const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState<string>('');
 
@@ -32,13 +32,15 @@ export const CreditRequestForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTier || !address) return;
+    if (!selectedTier || !address || !chain) return;
     
     writeRequestCredit({
       address: CONTRACTS.LendingPool.address as `0x${string}`,
       abi: CONTRACTS.LendingPool.abi,
       functionName: 'requestCredit',
       args: [parseInt(selectedTier)],
+      chain,
+      account: address,
     });
   };
 
