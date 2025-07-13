@@ -22,8 +22,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useWeb3Integration } from "@/hooks/useWeb3Integration";
-import DepositForm from "@/components/web3/DepositForm";
-import WithdrawForm from "@/components/web3/WithdrawForm";
+import { DepositForm } from "@/components/web3/DepositForm";
+import { WithdrawForm } from "@/components/web3/WithdrawForm";
 import { useAccount } from "wagmi";
 import { formatUnits } from "viem";
 import { formatUSDC } from "@/lib/contracts";
