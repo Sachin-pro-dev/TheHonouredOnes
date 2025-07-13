@@ -1,420 +1,384 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, CreditCard, DollarSign, Gift, Plus, Eye, Zap, Target, ExternalLink, Coins } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  TrendingUp, 
+  DollarSign, 
+  CreditCard, 
+  Shield, 
+  Zap, 
+  ArrowUpRight, 
+  Plus,
+  Wallet,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  Sparkles,
+  Target,
+  Award,
+  TrendingDown
+} from "lucide-react";
 import { Link } from "react-router-dom";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, AreaChart, Area } from "recharts";
 import { useWeb3Integration } from "@/hooks/useWeb3Integration";
-import { DepositForm } from "@/components/web3/DepositForm";
-import { WithdrawForm } from "@/components/web3/WithdrawForm";
+import DepositForm from "@/components/web3/DepositForm";
+import WithdrawForm from "@/components/web3/WithdrawForm";
+import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
 
 const Dashboard = () => {
-  // Web3 Integration
-  const {
-    isConnected,
-    usdcBalance,
-    poolStats,
-    userVoucherInfo,
-    userDeposits,
-    claimFaucet,
-    isFaucetLoading
+  const { address } = useAccount();
+  const { 
+    usdcBalance, 
+    poolStats, 
+    userVoucherInfo, 
+    faucetMockUSDC, 
+    isLoading 
   } = useWeb3Integration();
 
-  const scoreData = [
-    { month: 'Jan', score: 650 },
-    { month: 'Feb', score: 670 },
-    { month: 'Mar', score: 680 },
-    { month: 'Apr', score: 695 },
-    { month: 'May', score: 710 },
-    { month: 'Jun', score: 720 },
-  ];
-
-  const activities = [
-    { type: 'payment', description: 'Loan repayment of 5,000 USDT', time: '2 hours ago', impact: '+5 points' },
-    { type: 'loan', description: 'New loan approved - 15,000 USDT', time: '1 day ago', impact: 'No impact' },
-    { type: 'cashback', description: 'Cashback earned from Flipkart', time: '2 days ago', impact: '+150 USDT' },
-    { type: 'score', description: 'Credit score updated', time: '3 days ago', impact: '+12 points' },
-  ];
-
-  const creditHistory = [
-    {
-      id: 1,
-      lender: "CLen Protocol",
-      amount: "15,000 USDT",
-      date: "2024-06-15",
-      status: "Active",
-      walletAddress: "0x1234...5678",
-      interestRate: "8.5%",
-      dueDate: "2024-12-15",
-      category: "Personal Loan"
-    },
-    {
-      id: 2,
-      lender: "DeFi Lender DAO",
-      amount: "8,500 USDT",
-      date: "2024-05-20",
-      status: "Paid",
-      walletAddress: "0xabcd...efgh",
-      interestRate: "9.2%",
-      dueDate: "2024-11-20",
-      category: "Business Loan"
-    },
-    {
-      id: 3,
-      lender: "Crypto Credit Union",
-      amount: "3,200 USDT",
-      date: "2024-04-10",
-      status: "Overdue",
-      walletAddress: "0x9876...5432",
-      interestRate: "12.0%",
-      dueDate: "2024-10-10",
-      category: "Emergency Loan"
-    }
-  ];
-
-  const recommendations = [
-    {
-      title: "Optimize Credit Utilization",
-      description: "Your utilization is at 65%. Keep it below 30% for better scores.",
-      impact: "+15-25 points",
-      action: "Pay 8,000 USDT"
-    },
-    {
-      title: "Set Auto-Pay",
-      description: "Never miss a payment with automatic repayments.",
-      impact: "+10-20 points",
-      action: "Enable Now"
-    },
-    {
-      title: "Upgrade Voucher Tier",
-      description: "Unlock higher limits with Premium tier.",
-      impact: "50% more credit",
-      action: "Upgrade"
-    }
-  ];
-
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return <Badge className="bg-green-100 text-green-700">Active</Badge>;
-      case 'paid':
-        return <Badge className="bg-blue-100 text-blue-700">Paid</Badge>;
-      case 'overdue':
-        return <Badge className="bg-red-100 text-red-700">Overdue</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
+  const formatCurrency = (value: bigint | undefined) => {
+    if (!value) return "0.00";
+    return Number(formatUnits(value, 6)).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   };
 
-  // Calculate metrics from Web3 data
-  const creditScore = 720;
-  const availableCredit = userVoucherInfo ? parseFloat(userVoucherInfo.limit) - parseFloat(userVoucherInfo.utilized) : 0;
-  const activeLoans = userVoucherInfo && parseFloat(userVoucherInfo.debt) > 0 ? 1 : 0;
-  const utilizationPercent = userVoucherInfo ? 
-    (parseFloat(userVoucherInfo.utilized) / parseFloat(userVoucherInfo.limit)) * 100 : 0;
+  const creditUtilization = userVoucherInfo ? 
+    (Number(formatUnits(userVoucherInfo.utilized, 6)) / Number(formatUnits(userVoucherInfo.limit, 6))) * 100 : 0;
+
+  const quickActions = [
+    {
+      title: "Get Test USDC",
+      description: "Claim free tokens for testing",
+      icon: Plus,
+      action: faucetMockUSDC,
+      variant: "default" as const,
+      gradient: "from-clen-green/20 to-clen-blue/20"
+    },
+    {
+      title: "Request Credit",
+      description: "Apply for instant loan",
+      icon: CreditCard,
+      href: "/credit/request",
+      variant: "default" as const,
+      gradient: "from-clen-blue/20 to-clen-purple/20"
+    },
+    {
+      title: "Repay Loan",
+      description: "Make a payment",
+      icon: DollarSign,
+      href: "/credit/repay",
+      variant: "outline" as const,
+      gradient: "from-clen-purple/20 to-clen-orange/20"
+    }
+  ];
+
+  const recentActivities = [
+    {
+      type: "deposit",
+      description: "USDC Deposit",
+      amount: "$1,250.00",
+      time: "2 hours ago",
+      status: "completed",
+      icon: TrendingUp
+    },
+    {
+      type: "loan",
+      description: "Credit Request",
+      amount: "$5,000.00",
+      time: "1 day ago",
+      status: "approved",
+      icon: CheckCircle
+    },
+    {
+      type: "repay",
+      description: "Loan Repayment",
+      amount: "$500.00",
+      time: "3 days ago",
+      status: "completed",
+      icon: DollarSign
+    }
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
+    <div className="space-y-8">
+      {/* Enhanced Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Welcome back, Aarav!</h1>
-          <p className="text-muted-foreground">Here's your financial overview</p>
+          <h1 className="text-4xl font-bold gradient-text flex items-center space-x-3">
+            <Sparkles className="w-8 h-8 text-primary" />
+            <span>Dashboard</span>
+          </h1>
+          <p className="text-muted-foreground text-lg mt-2">
+            Welcome back! Here's your financial overview.
+          </p>
         </div>
-        <div className="flex space-x-3">
-          {isConnected && (
-            <Button
-              onClick={claimFaucet}
-              disabled={isFaucetLoading}
-              variant="outline"
-              className="glass-button"
-            >
-              <Coins className="w-4 h-4 mr-2" />
-              {isFaucetLoading ? 'Claiming...' : 'Get Test USDT'}
-            </Button>
-          )}
-          <Button className="bg-gradient-primary" asChild>
-            <Link to="/credit/request">
-              <Plus className="w-4 h-4 mr-2" />
-              Request Loan
-            </Link>
-          </Button>
+        <div className="flex items-center space-x-3">
+          <Badge variant="secondary" className="glass-card bg-gradient-to-r from-clen-green/10 to-clen-blue/10 border-primary/20">
+            <div className="w-2 h-2 bg-clen-green rounded-full animate-pulse mr-2" />
+            Live on Base
+          </Badge>
         </div>
       </div>
 
-      {/* USDC Balance Card */}
-      {isConnected && (
-        <Card className="glass-strong">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <DollarSign className="w-5 h-5 text-clen-green" />
-              <span>USDT Balance</span>
-            </CardTitle>
+      {/* Enhanced Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="glass-card border-border/30 hover:shadow-glow transition-all duration-300 hover:-translate-y-1 group">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">USDC Balance</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-clen-green to-clen-blue flex items-center justify-center">
+                <Wallet className="w-4 h-4 text-white" />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-clen-green">${usdcBalance}</div>
-            <p className="text-sm text-muted-foreground">Available in your wallet</p>
+            <div className="text-3xl font-bold gradient-text">
+              ${formatCurrency(usdcBalance)}
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <TrendingUp className="w-4 h-4 text-clen-green" />
+              <span className="text-sm text-clen-green">+12.5%</span>
+              <span className="text-sm text-muted-foreground">this month</span>
+            </div>
           </CardContent>
         </Card>
-      )}
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="glass-card hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Credit Score</CardTitle>
-            <TrendingUp className="h-4 w-4 text-clen-green" />
+        <Card className="glass-card border-border/30 hover:shadow-glow transition-all duration-300 hover:-translate-y-1 group">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Credit Limit</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-clen-blue to-clen-purple flex items-center justify-center">
+                <CreditCard className="w-4 h-4 text-white" />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold gradient-text">{creditScore}</div>
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <Badge variant="secondary" className="bg-clen-green/10 text-clen-green">
-                +12 this month
+            <div className="text-3xl font-bold gradient-text">
+              ${userVoucherInfo ? formatCurrency(userVoucherInfo.limit) : "0.00"}
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <Target className="w-4 h-4 text-clen-blue" />
+              <span className="text-sm text-muted-foreground">
+                ${userVoucherInfo ? formatCurrency(userVoucherInfo.limit - userVoucherInfo.utilized) : "0.00"} available
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-border/30 hover:shadow-glow transition-all duration-300 hover:-translate-y-1 group">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Outstanding Debt</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-clen-purple to-clen-orange flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-clen-orange">
+              ${userVoucherInfo ? formatCurrency(userVoucherInfo.debt) : "0.00"}
+            </div>
+            <div className="flex items-center space-x-2 mt-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Next payment in 15 days</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-border/30 hover:shadow-glow transition-all duration-300 hover:-translate-y-1 group">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Credit Score</CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-clen-orange to-clen-green flex items-center justify-center">
+                <Award className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold gradient-text">750</div>
+            <div className="flex items-center space-x-2 mt-2">
+              <TrendingUp className="w-4 h-4 text-clen-green" />
+              <span className="text-sm text-clen-green">+25 points</span>
+              <span className="text-sm text-muted-foreground">this month</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Enhanced Credit Utilization */}
+      {userVoucherInfo && (
+        <Card className="glass-card border-border/30">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl">Credit Utilization</CardTitle>
+                <CardDescription>
+                  ${formatCurrency(userVoucherInfo.utilized)} of ${formatCurrency(userVoucherInfo.limit)} used
+                </CardDescription>
+              </div>
+              <Badge variant={creditUtilization > 80 ? "destructive" : creditUtilization > 50 ? "secondary" : "default"}>
+                {creditUtilization.toFixed(1)}%
               </Badge>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Available Credit</CardTitle>
-            <CreditCard className="h-4 w-4 text-clen-blue" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white">{availableCredit.toLocaleString()} USDT</div>
-            <Progress value={utilizationPercent} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">{utilizationPercent.toFixed(1)}% utilized</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Active Loans</CardTitle>
-            <DollarSign className="h-4 w-4 text-clen-orange" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{activeLoans}</div>
-            <p className="text-xs text-muted-foreground">
-              {userVoucherInfo?.debt && parseFloat(userVoucherInfo.debt) > 0 
-                ? `Outstanding: $${userVoucherInfo.debt}` 
-                : 'No active loans'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Pool Deposits</CardTitle>
-            <Gift className="h-4 w-4 text-clen-purple" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">${userDeposits}</div>
-            <p className="text-xs text-muted-foreground">Your contribution to pool</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Web3 Actions */}
-      {isConnected && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DepositForm />
-          <WithdrawForm userDeposits={userDeposits} />
-        </div>
-      )}
-
-      {/* Pool Stats */}
-      {poolStats && (
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="text-white">Pool Statistics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-lg font-semibold text-clen-green">${poolStats.totalDeposits}</div>
-                <div className="text-sm text-muted-foreground">Total Deposits</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-semibold text-clen-blue">${poolStats.totalBorrowed}</div>
-                <div className="text-sm text-muted-foreground">Total Borrowed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-semibold text-clen-purple">${poolStats.totalRepaid}</div>
-                <div className="text-sm text-muted-foreground">Total Repaid</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-semibold text-clen-orange">${poolStats.availableLiquidity}</div>
-                <div className="text-sm text-muted-foreground">Available Liquidity</div>
-              </div>
+            <Progress 
+              value={creditUtilization} 
+              className="h-3"
+            />
+            <div className="flex justify-between text-sm text-muted-foreground mt-2">
+              <span>Excellent utilization is below 30%</span>
+              <span>{creditUtilization > 80 ? "High" : creditUtilization > 50 ? "Moderate" : "Good"}</span>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Credit Score Visualization & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="w-5 h-5 text-clen-green" />
-              <span className="text-white">Credit Score Trend</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={scoreData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="month" stroke="rgba(255,255,255,0.5)" />
-                <YAxis stroke="rgba(255,255,255,0.5)" />
-                <Area 
-                  type="monotone" 
-                  dataKey="score" 
-                  stroke="hsl(var(--clen-green))" 
-                  fill="hsl(var(--clen-green))"
-                  fillOpacity={0.2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Zap className="w-5 h-5 text-clen-blue" />
-              <span className="text-white">Quick Actions</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
-              <Link to="/credit/request">
-                <Plus className="w-4 h-4 mr-3" />
-                Request New Loan
-              </Link>
-            </Button>
-            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
-              <Link to="/credit/repay">
-                <CreditCard className="w-4 h-4 mr-3" />
-                Make Payment
-              </Link>
-            </Button>
-            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
-              <Link to="/credit/insights">
-                <Eye className="w-4 h-4 mr-3" />
-                View Credit Report
-              </Link>
-            </Button>
-            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
-              <Link to="/marketplace">
-                <Gift className="w-4 h-4 mr-3" />
-                Browse Offers
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Credit History Details */}
-      <Card className="glass-card">
+      {/* Enhanced Quick Actions */}
+      <Card className="glass-card border-border/30">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <CreditCard className="w-5 h-5 text-clen-blue" />
-            <span className="text-white">Credit History</span>
+          <CardTitle className="text-xl flex items-center space-x-2">
+            <Zap className="w-5 h-5 text-primary" />
+            <span>Quick Actions</span>
           </CardTitle>
+          <CardDescription>Common tasks and operations</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-white">Lender</TableHead>
-                <TableHead className="text-white">Amount</TableHead>
-                <TableHead className="text-white">Date</TableHead>
-                <TableHead className="text-white">Status</TableHead>
-                <TableHead className="text-white">Interest Rate</TableHead>
-                <TableHead className="text-white">Due Date</TableHead>
-                <TableHead className="text-white">Category</TableHead>
-                <TableHead className="text-white">Wallet Address</TableHead>
-                <TableHead className="text-white">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {creditHistory.map((loan) => (
-                <TableRow key={loan.id}>
-                  <TableCell className="font-medium text-white">{loan.lender}</TableCell>
-                  <TableCell className="text-white">{loan.amount}</TableCell>
-                  <TableCell className="text-white">{loan.date}</TableCell>
-                  <TableCell>{getStatusBadge(loan.status)}</TableCell>
-                  <TableCell className="text-white">{loan.interestRate}</TableCell>
-                  <TableCell className="text-white">{loan.dueDate}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="border-white/20 text-white">{loan.category}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <code className="text-xs bg-secondary px-2 py-1 rounded text-white">
-                      {loan.walletAddress}
-                    </code>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="ghost" className="glass-button">
-                      <ExternalLink className="w-3 h-3" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {quickActions.map((action, index) => (
+              <div key={index} className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${action.gradient} p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <action.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <ArrowUpRight className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="font-semibold text-white mb-2">{action.title}</h3>
+                <p className="text-white/80 text-sm mb-4">{action.description}</p>
+                {action.action ? (
+                  <Button 
+                    onClick={action.action}
+                    variant={action.variant}
+                    size="sm"
+                    className="glass-button border-white/20 hover:border-white/40 text-white hover:bg-white/10"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Processing..." : "Execute"}
+                  </Button>
+                ) : (
+                  <Button 
+                    variant={action.variant}
+                    size="sm"
+                    className="glass-button border-white/20 hover:border-white/40 text-white hover:bg-white/10"
+                    asChild
+                  >
+                    <Link to={action.href!}>Execute</Link>
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
-      {/* AI Insights & Recent Activity */}
+      {/* Enhanced Pool Stats & Web3 Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="glass-card">
+        <Card className="glass-card border-border/30">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Target className="w-5 h-5 text-clen-purple" />
-              <span className="text-white">AI Recommendations</span>
+            <CardTitle className="text-xl flex items-center space-x-2">
+              <Shield className="w-5 h-5 text-primary" />
+              <span>Pool Statistics</span>
             </CardTitle>
+            <CardDescription>Real-time lending pool metrics</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {recommendations.map((rec, index) => (
-              <div key={index} className="p-4 rounded-lg glass border border-white/10">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <h4 className="font-medium text-white">{rec.title}</h4>
-                    <p className="text-sm text-muted-foreground">{rec.description}</p>
-                    <Badge variant="secondary" className="text-xs bg-white/10 text-white">{rec.impact}</Badge>
-                  </div>
-                  <Button size="sm" variant="outline" className="glass-button">
-                    {rec.action}
-                  </Button>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="glass rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">Total Deposits</div>
+                <div className="text-2xl font-bold gradient-text">
+                  ${poolStats ? formatCurrency(poolStats.totalDeposits) : "0.00"}
                 </div>
               </div>
-            ))}
+              <div className="glass rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">Available Liquidity</div>
+                <div className="text-2xl font-bold text-clen-green">
+                  ${poolStats ? formatCurrency(poolStats.availableLiquidity) : "0.00"}
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="glass rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">Total Borrowed</div>
+                <div className="text-2xl font-bold text-clen-blue">
+                  ${poolStats ? formatCurrency(poolStats.totalBorrowed) : "0.00"}
+                </div>
+              </div>
+              <div className="glass rounded-lg p-4">
+                <div className="text-sm text-muted-foreground mb-1">Total Repaid</div>
+                <div className="text-2xl font-bold text-clen-purple">
+                  ${poolStats ? formatCurrency(poolStats.totalRepaid) : "0.00"}
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card className="glass-card border-border/30">
           <CardHeader>
-            <CardTitle className="text-white">Recent Activity</CardTitle>
+            <CardTitle className="text-xl">Recent Activity</CardTitle>
+            <CardDescription>Latest transactions and updates</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {activities.map((activity, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-clen-green rounded-full mt-2"></div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm text-white">{activity.description}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
-                    <Badge variant="secondary" className="text-xs bg-white/10 text-white">
-                      {activity.impact}
-                    </Badge>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivities.map((activity, index) => (
+                <div key={index} className="flex items-center space-x-4 p-4 glass rounded-lg hover:bg-primary/5 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center">
+                    <activity.icon className="w-5 h-5 text-black" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium">{activity.description}</p>
+                      <span className="text-lg font-bold">{activity.amount}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-sm text-muted-foreground">{activity.time}</span>
+                      <Badge 
+                        variant={activity.status === 'completed' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {activity.status}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Enhanced Web3 Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="glass-card border-border/30">
+          <CardHeader>
+            <CardTitle className="text-xl">Deposit USDC</CardTitle>
+            <CardDescription>Add funds to the lending pool</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DepositForm />
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-border/30">
+          <CardHeader>
+            <CardTitle className="text-xl">Withdraw USDC</CardTitle>
+            <CardDescription>Withdraw your deposited funds</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WithdrawForm />
           </CardContent>
         </Card>
       </div>
