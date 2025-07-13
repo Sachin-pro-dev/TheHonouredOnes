@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, CreditCard, DollarSign, Gift, Plus, Eye, Zap, Target } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TrendingUp, CreditCard, DollarSign, Gift, Plus, Eye, Zap, Target, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, AreaChart, Area } from "recharts";
 
@@ -23,10 +25,46 @@ const Dashboard = () => {
   ];
 
   const activities = [
-    { type: 'payment', description: 'Loan repayment of ₹5,000', time: '2 hours ago', impact: '+5 points' },
-    { type: 'loan', description: 'New loan approved - ₹15,000', time: '1 day ago', impact: 'No impact' },
-    { type: 'cashback', description: 'Cashback earned from Flipkart', time: '2 days ago', impact: '+₹150' },
+    { type: 'payment', description: 'Loan repayment of 5,000 USDT', time: '2 hours ago', impact: '+5 points' },
+    { type: 'loan', description: 'New loan approved - 15,000 USDT', time: '1 day ago', impact: 'No impact' },
+    { type: 'cashback', description: 'Cashback earned from Flipkart', time: '2 days ago', impact: '+150 USDT' },
     { type: 'score', description: 'Credit score updated', time: '3 days ago', impact: '+12 points' },
+  ];
+
+  const creditHistory = [
+    {
+      id: 1,
+      lender: "CLen Protocol",
+      amount: "15,000 USDT",
+      date: "2024-06-15",
+      status: "Active",
+      walletAddress: "0x1234...5678",
+      interestRate: "8.5%",
+      dueDate: "2024-12-15",
+      category: "Personal Loan"
+    },
+    {
+      id: 2,
+      lender: "DeFi Lender DAO",
+      amount: "8,500 USDT",
+      date: "2024-05-20",
+      status: "Paid",
+      walletAddress: "0xabcd...efgh",
+      interestRate: "9.2%",
+      dueDate: "2024-11-20",
+      category: "Business Loan"
+    },
+    {
+      id: 3,
+      lender: "Crypto Credit Union",
+      amount: "3,200 USDT",
+      date: "2024-04-10",
+      status: "Overdue",
+      walletAddress: "0x9876...5432",
+      interestRate: "12.0%",
+      dueDate: "2024-10-10",
+      category: "Emergency Loan"
+    }
   ];
 
   const recommendations = [
@@ -34,7 +72,7 @@ const Dashboard = () => {
       title: "Optimize Credit Utilization",
       description: "Your utilization is at 65%. Keep it below 30% for better scores.",
       impact: "+15-25 points",
-      action: "Pay ₹8,000"
+      action: "Pay 8,000 USDT"
     },
     {
       title: "Set Auto-Pay",
@@ -49,6 +87,19 @@ const Dashboard = () => {
       action: "Upgrade"
     }
   ];
+
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return <Badge className="bg-green-100 text-green-700">Active</Badge>;
+      case 'paid':
+        return <Badge className="bg-blue-100 text-blue-700">Paid</Badge>;
+      case 'overdue':
+        return <Badge className="bg-red-100 text-red-700">Overdue</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -89,7 +140,7 @@ const Dashboard = () => {
             <CreditCard className="h-4 w-4 text-clen-blue" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{availableCredit.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{availableCredit.toLocaleString()} USDT</div>
             <Progress value={65} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">65% utilized</p>
           </CardContent>
@@ -102,7 +153,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeLoans}</div>
-            <p className="text-xs text-muted-foreground">Next payment: ₹2,500 in 5 days</p>
+            <p className="text-xs text-muted-foreground">Next payment: 2,500 USDT in 5 days</p>
           </CardContent>
         </Card>
 
@@ -112,8 +163,8 @@ const Dashboard = () => {
             <Gift className="h-4 w-4 text-clen-purple" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{totalCashback.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">This month: ₹350</p>
+            <div className="text-2xl font-bold">{totalCashback.toLocaleString()} USDT</div>
+            <p className="text-xs text-muted-foreground">This month: 350 USDT</p>
           </CardContent>
         </Card>
       </div>
@@ -180,6 +231,58 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Credit History Details */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <CreditCard className="w-5 h-5 text-clen-blue" />
+            <span>Credit History</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lender</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Interest Rate</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Wallet Address</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {creditHistory.map((loan) => (
+                <TableRow key={loan.id}>
+                  <TableCell className="font-medium">{loan.lender}</TableCell>
+                  <TableCell>{loan.amount}</TableCell>
+                  <TableCell>{loan.date}</TableCell>
+                  <TableCell>{getStatusBadge(loan.status)}</TableCell>
+                  <TableCell>{loan.interestRate}</TableCell>
+                  <TableCell>{loan.dueDate}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{loan.category}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <code className="text-xs bg-secondary px-2 py-1 rounded">
+                      {loan.walletAddress}
+                    </code>
+                  </TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="ghost">
+                      <ExternalLink className="w-3 h-3" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* AI Insights & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

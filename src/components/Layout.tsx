@@ -1,10 +1,12 @@
+
 import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Bell, Search, Wallet, Settings, User, ChevronDown } from "lucide-react";
+import { Bell, Search, Settings, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAccount, useDisconnect } from "wagmi";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import NavigationDock from "./NavigationDock";
 
 interface LayoutProps {
@@ -43,26 +45,111 @@ const Layout = ({ children }: LayoutProps) => {
 
           {/* User Controls */}
           <div className="flex items-center space-x-4">
-            {/* Wallet Status */}
-            {isConnected ? (
-              <Button variant="outline" size="sm" className="hidden sm:flex items-center space-x-2">
-                <Wallet className="w-4 h-4" />
-                <span className="text-xs">
-                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected'}
-                </span>
-                <div className="w-2 h-2 bg-clen-green rounded-full animate-pulse"></div>
-              </Button>
-            ) : (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="hidden sm:flex items-center space-x-2"
-                onClick={() => navigate('/auth/connect')}
-              >
-                <Wallet className="w-4 h-4" />
-                <span className="text-xs">Connect Wallet</span>
-              </Button>
-            )}
+            {/* Functional Wallet Connect Button */}
+            <ConnectButton.Custom>
+              {({
+                account,
+                chain,
+                openAccountModal,
+                openChainModal,
+                openConnectModal,
+                authenticationStatus,
+                mounted,
+              }) => {
+                const ready = mounted && authenticationStatus !== 'loading';
+                const connected =
+                  ready &&
+                  account &&
+                  chain &&
+                  (!authenticationStatus ||
+                    authenticationStatus === 'authenticated');
+
+                return (
+                  <div
+                    {...(!ready && {
+                      'aria-hidden': true,
+                      'style': {
+                        opacity: 0,
+                        pointerEvents: 'none',
+                        userSelect: 'none',
+                      },
+                    })}
+                  >
+                    {(() => {
+                      if (!connected) {
+                        return (
+                          <Button
+                            onClick={openConnectModal}
+                            variant="outline"
+                            size="sm"
+                            className="hidden sm:flex items-center space-x-2"
+                          >
+                            Connect Wallet
+                          </Button>
+                        );
+                      }
+
+                      if (chain.unsupported) {
+                        return (
+                          <Button
+                            onClick={openChainModal}
+                            variant="destructive"
+                            size="sm"
+                          >
+                            Wrong Network
+                          </Button>
+                        );
+                      }
+
+                      return (
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={openChainModal}
+                            variant="outline"
+                            size="sm"
+                            className="hidden sm:flex items-center space-x-1"
+                          >
+                            {chain.hasIcon && (
+                              <div
+                                style={{
+                                  background: chain.iconBackground,
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: 999,
+                                  overflow: 'hidden',
+                                  marginRight: 4,
+                                }}
+                              >
+                                {chain.iconUrl && (
+                                  <img
+                                    alt={chain.name ?? 'Chain icon'}
+                                    src={chain.iconUrl}
+                                    style={{ width: 12, height: 12 }}
+                                  />
+                                )}
+                              </div>
+                            )}
+                            {chain.name}
+                          </Button>
+
+                          <Button
+                            onClick={openAccountModal}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center space-x-2"
+                          >
+                            <span className="text-xs">
+                              {account.displayName}
+                            </span>
+                            <div className="w-2 h-2 bg-clen-green rounded-full animate-pulse"></div>
+                          </Button>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                );
+              }}
+            </ConnectButton.Custom>
 
             {/* Notifications */}
             <Button variant="ghost" size="sm" className="relative">
@@ -94,13 +181,13 @@ const Layout = ({ children }: LayoutProps) => {
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => {
-                    disconnect();
+                    if (isConnected) {
+                      disconnect();
+                    }
                     navigate('/');
                   }}
-                  disabled={!isConnected}
                 >
-                  <Wallet className="w-4 h-4 mr-2" />
-                  {isConnected ? 'Disconnect Wallet' : 'No Wallet Connected'}
+                  {isConnected ? 'Disconnect & Logout' : 'Logout'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

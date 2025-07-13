@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLen - Aadhaar ZK Verification</title>
+    <style>
+        /* Modern styling matching the app design */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: #e5e7eb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container { 
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 700px;
+            width: 100%;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: black;
+        }
+
+        h1 { 
+            color: #f9fafb;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box h4 {
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .info-box ol {
+            color: #93c5fd;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            padding-left: 1rem;
+        }
+
+        .info-box ol li {
+            margin-bottom: 0.25rem;
+        }
+
+        .info-box a {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+
+        label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: 600; 
+            color: #f3f4f6; 
+            font-size: 0.875rem;
+        }
+
+        input[type="file"], input[type="text"] {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: #f9fafb;
+            transition: all 0.2s ease;
+        }
+
+        input[type="file"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            color: black;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button { 
+            display: block;
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            margin-top: 1rem;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            color: black;
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            font-weight: 600;
+            cursor: pointer; 
+            transition: all 0.2s ease;
+        }
+
+        button:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading { 
+            display: none; 
+            text-align: center; 
+            margin-top: 1.5rem; 
+            color: #8b5cf6; 
+            font-weight: 600; 
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result { 
+            display: none; 
+            margin-top: 2rem; 
+            padding: 1.5rem; 
+            border: 1px solid #10b981; 
+            background: rgba(16, 185, 129, 0.1); 
+            border-radius: 12px; 
+            text-align: center;
+        }
+
+        .result h2 { 
+            color: #10b981; 
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .user-photo { 
+            max-width: 120px; 
+            height: 120px; 
+            border-radius: 50%; 
+            border: 3px solid #10b981; 
+            margin: 0 auto 1rem; 
+            display: block; 
+            object-fit: cover; 
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.875rem;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #d1d5db;
+        }
+
+        .detail-value {
+            color: #f9fafb;
+            font-family: monospace;
+        }
+
+        .privacy-note {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #c4b5fd;
+            line-height: 1.4;
+        }
+
+        .error-display { 
+            display: none; 
+            margin-top: 1.5rem; 
+            padding: 1rem; 
+            background: rgba(239, 68, 68, 0.1); 
+            border: 1px solid rgba(239, 68, 68, 0.3); 
+            border-radius: 8px; 
+            color: #fca5a5; 
+        }
+
+        .success-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0.25rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">C</div>
+            <h1>Aadhaar ZK Verification</h1>
+            <p class="subtitle">Secure identity verification using zero-knowledge proofs</p>
+        </div>
+
+        <div class="info-box">
+            <h4>📋 How to get your Aadhaar XML:</h4>
+            <ol>
+                <li>Visit <a href="https://myaadhaar.uidai.gov.in/offline-ekyc" target="_blank">myaadhaar.uidai.gov.in/offline-ekyc</a></li>
+                <li>Login with your Aadhaar/VID and OTP</li>
+                <li>Create a 4-digit Share Code (remember this!)</li>
+                <li>Download the ZIP file</li>
+            </ol>
+        </div>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="aadhaarFile">Upload Aadhaar XML ZIP File:</label>
+            <input type="file" id="aadhaarFile" name="aadhaarFile" accept=".zip" required>
+            
+            <label for="shareCode">Enter 4-digit Share Code (Password):</label>
+            <input type="text" id="shareCode" name="shareCode" maxlength="4" minlength="4" pattern="[0-9]{4}" title="Please enter exactly 4 digits" required>
+            
+            <button type="submit">Verify with ZK Proof</button>
+        </form>
+
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Processing Aadhaar data securely...</p>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: #9ca3af;">Generating zero-knowledge proofs</p>
+        </div>
+
+        <div id="aadhaarDetails" class="result">
+            <h2>✅ Verification Successful!</h2>
+            <img id="userPhoto" class="user-photo" src="" alt="User Photo" style="display: none;">
+            
+            <div style="max-width: 400px; margin: 0 auto;">
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value" id="name"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date of Birth:</span>
+                    <span class="detail-value" id="dob"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Gender:</span>
+                    <span class="detail-value" id="gender"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Reference ID:</span>
+                    <span class="detail-value" id="referenceId"></span>
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem;">
+                <span class="success-badge">✓ Age verified (18+)</span>
+                <span class="success-badge">✓ Identity confirmed</span>
+                <span class="success-badge">✓ State verified</span>
+            </div>
+
+            <div class="privacy-note">
+                <strong>🔒 Privacy Protected:</strong> Your complete address and full Aadhaar number are not displayed for security. Only verification proofs are generated using zero-knowledge cryptography.
+            </div>
+        </div>
+
+        <div id="errorDisplay" class="error-display">
+            <p><strong>⚠️ Verification Failed:</strong> <span id="errorMessage"></span></p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">Please ensure you uploaded the correct Aadhaar XML ZIP file and entered the correct 4-digit Share Code.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Reset display areas and show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('aadhaarDetails').style.display = 'none';
+            document.getElementById('errorDisplay').style.display = 'none';
+            document.getElementById('userPhoto').style.display = 'none';
+            document.getElementById('errorMessage').textContent = '';
+
+            try {
+                const response = await fetch('/verify-aadhaar', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                document.getElementById('loading').style.display = 'none';
+
+                if (response.ok && result.success) {
+                    document.getElementById('name').textContent = result.name;
+                    document.getElementById('dob').textContent = result.dob;
+                    document.getElementById('gender').textContent = result.gender === 'M' ? 'Male' : result.gender === 'F' ? 'Female' : result.gender;
+                    document.getElementById('referenceId').textContent = result.referenceId;
+
+                    if (result.photo) {
+                        const userPhoto = document.getElementById('userPhoto');
+                        userPhoto.src = `data:image/jpeg;base64,${result.photo}`;
+                        userPhoto.style.display = 'block';
+                    }
+
+                    document.getElementById('aadhaarDetails').style.display = 'block';
+                } else {
+                    document.getElementById('errorMessage').textContent = result.error || 'An unknown error occurred on the server.';
+                    document.getElementById('errorDisplay').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('errorMessage').textContent = `Failed to connect to the server: ${error.message}`;
+                document.getElementById('errorDisplay').style.display = 'block';
+                console.error('Fetch error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
