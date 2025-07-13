@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAccount, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { CONTRACTS, formatUSDC, parseUSDC } from '@/lib/contracts';
 import { useToast } from '@/hooks/use-toast';
 
@@ -9,55 +9,52 @@ export const useWeb3Integration = () => {
   const { toast } = useToast();
   
   // USDC Balance
-  const { data: usdcBalance, refetch: refetchUSDCBalance } = useContractRead({
+  const { data: usdcBalance, refetch: refetchUSDCBalance } = useReadContract({
     address: CONTRACTS.MockUSDC.address as `0x${string}`,
     abi: CONTRACTS.MockUSDC.abi,
     functionName: 'balanceOf',
     args: [address],
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    }
   });
 
   // Pool Stats
-  const { data: poolStats, refetch: refetchPoolStats } = useContractRead({
+  const { data: poolStats, refetch: refetchPoolStats } = useReadContract({
     address: CONTRACTS.LendingPool.address as `0x${string}`,
     abi: CONTRACTS.LendingPool.abi,
     functionName: 'getPoolStats',
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    }
   });
 
   // User Voucher Info
-  const { data: userVoucherInfo, refetch: refetchUserVoucherInfo } = useContractRead({
+  const { data: userVoucherInfo, refetch: refetchUserVoucherInfo } = useReadContract({
     address: CONTRACTS.LendingPool.address as `0x${string}`,
     abi: CONTRACTS.LendingPool.abi,
     functionName: 'getUserVoucherInfo',
     args: [address],
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    }
   });
 
   // User Deposits
-  const { data: userDeposits, refetch: refetchUserDeposits } = useContractRead({
+  const { data: userDeposits, refetch: refetchUserDeposits } = useReadContract({
     address: CONTRACTS.LendingPool.address as `0x${string}`,
     abi: CONTRACTS.LendingPool.abi,
     functionName: 'userDeposits',
     args: [address],
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    }
   });
 
   // Faucet function
-  const { config: faucetConfig } = usePrepareContractWrite({
-    address: CONTRACTS.MockUSDC.address as `0x${string}`,
-    abi: CONTRACTS.MockUSDC.abi,
-    functionName: 'faucet',
-    enabled: isConnected,
-  });
-
-  const { write: writeFaucet, data: faucetData } = useContractWrite(faucetConfig);
-  const { isLoading: isFaucetLoading, isSuccess: isFaucetSuccess } = useWaitForTransaction({
-    hash: faucetData?.hash,
+  const { writeContract: writeFaucet, data: faucetHash, isPending: isFaucetLoading } = useWriteContract();
+  const { isSuccess: isFaucetSuccess } = useWaitForTransactionReceipt({
+    hash: faucetHash,
   });
 
   useEffect(() => {
@@ -71,8 +68,12 @@ export const useWeb3Integration = () => {
   }, [isFaucetSuccess, toast, refetchUSDCBalance]);
 
   const claimFaucet = () => {
-    if (writeFaucet) {
-      writeFaucet();
+    if (isConnected) {
+      writeFaucet({
+        address: CONTRACTS.MockUSDC.address as `0x${string}`,
+        abi: CONTRACTS.MockUSDC.abi,
+        functionName: 'faucet',
+      });
     }
   };
 

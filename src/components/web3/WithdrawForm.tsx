@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAccount, useContractWrite, usePrepareContractWrite, useWaitForTransaction } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,18 +18,10 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
   const { toast } = useToast();
   const [withdrawAmount, setWithdrawAmount] = useState('');
 
-  // Prepare withdraw transaction
-  const { config: withdrawConfig } = usePrepareContractWrite({
-    address: CONTRACTS.LendingPool.address as `0x${string}`,
-    abi: CONTRACTS.LendingPool.abi,
-    functionName: 'withdraw',
-    args: [parseUSDC(withdrawAmount || '0')],
-    enabled: !!withdrawAmount && parseFloat(withdrawAmount) > 0,
-  });
-
-  const { write: writeWithdraw, data: withdrawData } = useContractWrite(withdrawConfig);
-  const { isLoading: isWithdrawing, isSuccess: isWithdrawn } = useWaitForTransaction({
-    hash: withdrawData?.hash,
+  // Contract write hook
+  const { writeContract: writeWithdraw, data: withdrawHash, isPending: isWithdrawing } = useWriteContract();
+  const { isSuccess: isWithdrawn } = useWaitForTransactionReceipt({
+    hash: withdrawHash,
   });
 
   useEffect(() => {
@@ -45,7 +37,13 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) return;
-    writeWithdraw?.();
+    
+    writeWithdraw({
+      address: CONTRACTS.LendingPool.address as `0x${string}`,
+      abi: CONTRACTS.LendingPool.abi,
+      functionName: 'withdraw',
+      args: [parseUSDC(withdrawAmount)],
+    });
   };
 
   const handleMaxClick = () => {
@@ -94,7 +92,7 @@ export const WithdrawForm = ({ userDeposits }: WithdrawFormProps) => {
 
           <Button
             type="submit"
-            disabled={!writeWithdraw || isWithdrawing || !withdrawAmount}
+            disabled={isWithdrawing || !withdrawAmount}
             className="w-full bg-gradient-primary hover:opacity-90"
           >
             {isWithdrawing ? (

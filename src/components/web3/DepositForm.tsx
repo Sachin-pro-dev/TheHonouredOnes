@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { useAccount, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CONTRACTS, parseUSDC, formatUSDC } from '@/lib/contracts';
+import { CONTRACTS, parseUSDC } from '@/lib/contracts';
 import { useToast } from '@/hooks/use-toast';
 import { DollarSign, Loader2 } from 'lucide-react';
 
@@ -15,44 +15,28 @@ export const DepositForm = () => {
   const [depositAmount, setDepositAmount] = useState('');
 
   // Check USDC allowance
-  const { data: allowanceData, refetch: refetchAllowance } = useContractRead({
+  const { data: allowanceData, refetch: refetchAllowance } = useReadContract({
     address: CONTRACTS.MockUSDC.address as `0x${string}`,
     abi: CONTRACTS.MockUSDC.abi,
     functionName: 'allowance',
     args: [address, CONTRACTS.LendingPool.address],
-    enabled: !!address,
-    watch: true,
+    query: {
+      enabled: !!address,
+    }
   });
 
   const needsApproval = allowanceData && depositAmount ? 
     (allowanceData as bigint) < parseUSDC(depositAmount) : true;
 
-  // Prepare approve transaction
-  const { config: approveConfig } = usePrepareContractWrite({
-    address: CONTRACTS.MockUSDC.address as `0x${string}`,
-    abi: CONTRACTS.MockUSDC.abi,
-    functionName: 'approve',
-    args: [CONTRACTS.LendingPool.address, parseUSDC(depositAmount || '0')],
-    enabled: needsApproval && !!depositAmount && parseFloat(depositAmount) > 0,
+  // Contract write hooks
+  const { writeContract: writeApprove, data: approveHash, isPending: isApproving } = useWriteContract();
+  const { isSuccess: isApproved } = useWaitForTransactionReceipt({
+    hash: approveHash,
   });
 
-  const { write: writeApprove, data: approveData } = useContractWrite(approveConfig);
-  const { isLoading: isApproving, isSuccess: isApproved } = useWaitForTransaction({
-    hash: approveData?.hash,
-  });
-
-  // Prepare deposit transaction
-  const { config: depositConfig } = usePrepareContractWrite({
-    address: CONTRACTS.LendingPool.address as `0x${string}`,
-    abi: CONTRACTS.LendingPool.abi,
-    functionName: 'deposit',
-    args: [parseUSDC(depositAmount || '0')],
-    enabled: !needsApproval && !!depositAmount && parseFloat(depositAmount) > 0,
-  });
-
-  const { write: writeDeposit, data: depositData } = useContractWrite(depositConfig);
-  const { isLoading: isDepositing, isSuccess: isDeposited } = useWaitForTransaction({
-    hash: depositData?.hash,
+  const { writeContract: writeDeposit, data: depositHash, isPending: isDepositing } = useWriteContract();
+  const { isSuccess: isDeposited } = useWaitForTransactionReceipt({
+    hash: depositHash,
   });
 
   useEffect(() => {
@@ -80,9 +64,19 @@ export const DepositForm = () => {
     if (!depositAmount || parseFloat(depositAmount) <= 0) return;
 
     if (needsApproval) {
-      writeApprove?.();
+      writeApprove({
+        address: CONTRACTS.MockUSDC.address as `0x${string}`,
+        abi: CONTRACTS.MockUSDC.abi,
+        functionName: 'approve',
+        args: [CONTRACTS.LendingPool.address, parseUSDC(depositAmount)],
+      });
     } else {
-      writeDeposit?.();
+      writeDeposit({
+        address: CONTRACTS.LendingPool.address as `0x${string}`,
+        abi: CONTRACTS.LendingPool.abi,
+        functionName: 'deposit',
+        args: [parseUSDC(depositAmount)],
+      });
     }
   };
 
@@ -113,7 +107,7 @@ export const DepositForm = () => {
           {needsApproval ? (
             <Button
               type="submit"
-              disabled={!writeApprove || isApproving || !depositAmount}
+              disabled={isApproving || !depositAmount}
               className="w-full glass-button"
             >
               {isApproving ? (
@@ -128,7 +122,7 @@ export const DepositForm = () => {
           ) : (
             <Button
               type="submit"
-              disabled={!writeDeposit || isDepositing || !depositAmount}
+              disabled={isDepositing || !depositAmount}
               className="w-full bg-gradient-primary hover:opacity-90"
             >
               {isDepositing ? (

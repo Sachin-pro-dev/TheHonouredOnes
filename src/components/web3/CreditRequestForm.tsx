@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useAccount, useContractWrite, usePrepareContractWrite, useWaitForTransaction } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,18 +14,10 @@ export const CreditRequestForm = () => {
   const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState<string>('');
 
-  // Prepare credit request transaction
-  const { config: creditConfig } = usePrepareContractWrite({
-    address: CONTRACTS.LendingPool.address as `0x${string}`,
-    abi: CONTRACTS.LendingPool.abi,
-    functionName: 'requestCredit',
-    args: [parseInt(selectedTier) || 1],
-    enabled: !!selectedTier,
-  });
-
-  const { write: writeRequestCredit, data: creditData } = useContractWrite(creditConfig);
-  const { isLoading: isRequesting, isSuccess: isRequested } = useWaitForTransaction({
-    hash: creditData?.hash,
+  // Contract write hook
+  const { writeContract: writeRequestCredit, data: creditHash, isPending: isRequesting } = useWriteContract();
+  const { isSuccess: isRequested } = useWaitForTransactionReceipt({
+    hash: creditHash,
   });
 
   useEffect(() => {
@@ -41,7 +33,13 @@ export const CreditRequestForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTier) return;
-    writeRequestCredit?.();
+    
+    writeRequestCredit({
+      address: CONTRACTS.LendingPool.address as `0x${string}`,
+      abi: CONTRACTS.LendingPool.abi,
+      functionName: 'requestCredit',
+      args: [parseInt(selectedTier)],
+    });
   };
 
   const tierOptions = [
@@ -87,7 +85,7 @@ export const CreditRequestForm = () => {
 
           <Button
             type="submit"
-            disabled={!writeRequestCredit || isRequesting || !selectedTier}
+            disabled={isRequesting || !selectedTier}
             className="w-full bg-gradient-primary hover:opacity-90"
           >
             {isRequesting ? (
