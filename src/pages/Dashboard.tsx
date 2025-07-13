@@ -1,19 +1,27 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, CreditCard, DollarSign, Gift, Plus, Eye, Zap, Target, ExternalLink } from "lucide-react";
+import { TrendingUp, CreditCard, DollarSign, Gift, Plus, Eye, Zap, Target, ExternalLink, Coins } from "lucide-react";
 import { Link } from "react-router-dom";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { useWeb3Integration } from "@/hooks/useWeb3Integration";
+import { DepositForm } from "@/components/web3/DepositForm";
+import { WithdrawForm } from "@/components/web3/WithdrawForm";
 
 const Dashboard = () => {
-  const [creditScore] = useState(720);
-  const [availableCredit] = useState(25000);
-  const [activeLoans] = useState(2);
-  const [totalCashback] = useState(1250);
+  // Web3 Integration
+  const {
+    isConnected,
+    usdcBalance,
+    poolStats,
+    userVoucherInfo,
+    userDeposits,
+    claimFaucet,
+    isFaucetLoading
+  } = useWeb3Integration();
 
   const scoreData = [
     { month: 'Jan', score: 650 },
@@ -101,27 +109,63 @@ const Dashboard = () => {
     }
   };
 
+  // Calculate metrics from Web3 data
+  const creditScore = 720;
+  const availableCredit = userVoucherInfo ? parseFloat(userVoucherInfo.limit) - parseFloat(userVoucherInfo.utilized) : 0;
+  const activeLoans = userVoucherInfo && parseFloat(userVoucherInfo.debt) > 0 ? 1 : 0;
+  const utilizationPercent = userVoucherInfo ? 
+    (parseFloat(userVoucherInfo.utilized) / parseFloat(userVoucherInfo.limit)) * 100 : 0;
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Welcome back, Aarav!</h1>
+          <h1 className="text-3xl font-bold text-white">Welcome back, Aarav!</h1>
           <p className="text-muted-foreground">Here's your financial overview</p>
         </div>
-        <Button className="bg-gradient-primary" asChild>
-          <Link to="/credit/request">
-            <Plus className="w-4 h-4 mr-2" />
-            Request Loan
-          </Link>
-        </Button>
+        <div className="flex space-x-3">
+          {isConnected && (
+            <Button
+              onClick={claimFaucet}
+              disabled={isFaucetLoading}
+              variant="outline"
+              className="glass-button"
+            >
+              <Coins className="w-4 h-4 mr-2" />
+              {isFaucetLoading ? 'Claiming...' : 'Get Test USDT'}
+            </Button>
+          )}
+          <Button className="bg-gradient-primary" asChild>
+            <Link to="/credit/request">
+              <Plus className="w-4 h-4 mr-2" />
+              Request Loan
+            </Link>
+          </Button>
+        </div>
       </div>
+
+      {/* USDC Balance Card */}
+      {isConnected && (
+        <Card className="glass-strong">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <DollarSign className="w-5 h-5 text-clen-green" />
+              <span>USDT Balance</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-clen-green">${usdcBalance}</div>
+            <p className="text-sm text-muted-foreground">Available in your wallet</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="glass-card hover-lift">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Credit Score</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Credit Score</CardTitle>
             <TrendingUp className="h-4 w-4 text-clen-green" />
           </CardHeader>
           <CardContent>
@@ -136,38 +180,79 @@ const Dashboard = () => {
 
         <Card className="glass-card hover-lift">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Credit</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Available Credit</CardTitle>
             <CreditCard className="h-4 w-4 text-clen-blue" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{availableCredit.toLocaleString()} USDT</div>
-            <Progress value={65} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">65% utilized</p>
+            <div className="text-2xl font-bold text-white">{availableCredit.toLocaleString()} USDT</div>
+            <Progress value={utilizationPercent} className="mt-2" />
+            <p className="text-xs text-muted-foreground mt-1">{utilizationPercent.toFixed(1)}% utilized</p>
           </CardContent>
         </Card>
 
         <Card className="glass-card hover-lift">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Loans</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Active Loans</CardTitle>
             <DollarSign className="h-4 w-4 text-clen-orange" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeLoans}</div>
-            <p className="text-xs text-muted-foreground">Next payment: 2,500 USDT in 5 days</p>
+            <div className="text-2xl font-bold text-white">{activeLoans}</div>
+            <p className="text-xs text-muted-foreground">
+              {userVoucherInfo?.debt && parseFloat(userVoucherInfo.debt) > 0 
+                ? `Outstanding: $${userVoucherInfo.debt}` 
+                : 'No active loans'}
+            </p>
           </CardContent>
         </Card>
 
         <Card className="glass-card hover-lift">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Cashback</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Pool Deposits</CardTitle>
             <Gift className="h-4 w-4 text-clen-purple" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalCashback.toLocaleString()} USDT</div>
-            <p className="text-xs text-muted-foreground">This month: 350 USDT</p>
+            <div className="text-2xl font-bold text-white">${userDeposits}</div>
+            <p className="text-xs text-muted-foreground">Your contribution to pool</p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Web3 Actions */}
+      {isConnected && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <DepositForm />
+          <WithdrawForm userDeposits={userDeposits} />
+        </div>
+      )}
+
+      {/* Pool Stats */}
+      {poolStats && (
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="text-white">Pool Statistics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-lg font-semibold text-clen-green">${poolStats.totalDeposits}</div>
+                <div className="text-sm text-muted-foreground">Total Deposits</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-clen-blue">${poolStats.totalBorrowed}</div>
+                <div className="text-sm text-muted-foreground">Total Borrowed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-clen-purple">${poolStats.totalRepaid}</div>
+                <div className="text-sm text-muted-foreground">Total Repaid</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-clen-orange">${poolStats.availableLiquidity}</div>
+                <div className="text-sm text-muted-foreground">Available Liquidity</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Credit Score Visualization & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -175,7 +260,7 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <TrendingUp className="w-5 h-5 text-clen-green" />
-              <span>Credit Score Trend</span>
+              <span className="text-white">Credit Score Trend</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -200,29 +285,29 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Zap className="w-5 h-5 text-clen-blue" />
-              <span>Quick Actions</span>
+              <span className="text-white">Quick Actions</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full justify-start" variant="ghost" asChild>
+            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
               <Link to="/credit/request">
                 <Plus className="w-4 h-4 mr-3" />
                 Request New Loan
               </Link>
             </Button>
-            <Button className="w-full justify-start" variant="ghost" asChild>
+            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
               <Link to="/credit/repay">
                 <CreditCard className="w-4 h-4 mr-3" />
                 Make Payment
               </Link>
             </Button>
-            <Button className="w-full justify-start" variant="ghost" asChild>
+            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
               <Link to="/credit/insights">
                 <Eye className="w-4 h-4 mr-3" />
                 View Credit Report
               </Link>
             </Button>
-            <Button className="w-full justify-start" variant="ghost" asChild>
+            <Button className="w-full justify-start glass-button" variant="ghost" asChild>
               <Link to="/marketplace">
                 <Gift className="w-4 h-4 mr-3" />
                 Browse Offers
@@ -237,43 +322,43 @@ const Dashboard = () => {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <CreditCard className="w-5 h-5 text-clen-blue" />
-            <span>Credit History</span>
+            <span className="text-white">Credit History</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Lender</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Interest Rate</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Wallet Address</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-white">Lender</TableHead>
+                <TableHead className="text-white">Amount</TableHead>
+                <TableHead className="text-white">Date</TableHead>
+                <TableHead className="text-white">Status</TableHead>
+                <TableHead className="text-white">Interest Rate</TableHead>
+                <TableHead className="text-white">Due Date</TableHead>
+                <TableHead className="text-white">Category</TableHead>
+                <TableHead className="text-white">Wallet Address</TableHead>
+                <TableHead className="text-white">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {creditHistory.map((loan) => (
                 <TableRow key={loan.id}>
-                  <TableCell className="font-medium">{loan.lender}</TableCell>
-                  <TableCell>{loan.amount}</TableCell>
-                  <TableCell>{loan.date}</TableCell>
+                  <TableCell className="font-medium text-white">{loan.lender}</TableCell>
+                  <TableCell className="text-white">{loan.amount}</TableCell>
+                  <TableCell className="text-white">{loan.date}</TableCell>
                   <TableCell>{getStatusBadge(loan.status)}</TableCell>
-                  <TableCell>{loan.interestRate}</TableCell>
-                  <TableCell>{loan.dueDate}</TableCell>
+                  <TableCell className="text-white">{loan.interestRate}</TableCell>
+                  <TableCell className="text-white">{loan.dueDate}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{loan.category}</Badge>
+                    <Badge variant="outline" className="border-white/20 text-white">{loan.category}</Badge>
                   </TableCell>
                   <TableCell>
-                    <code className="text-xs bg-secondary px-2 py-1 rounded">
+                    <code className="text-xs bg-secondary px-2 py-1 rounded text-white">
                       {loan.walletAddress}
                     </code>
                   </TableCell>
                   <TableCell>
-                    <Button size="sm" variant="ghost">
+                    <Button size="sm" variant="ghost" className="glass-button">
                       <ExternalLink className="w-3 h-3" />
                     </Button>
                   </TableCell>
@@ -290,19 +375,19 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Target className="w-5 h-5 text-clen-purple" />
-              <span>AI Recommendations</span>
+              <span className="text-white">AI Recommendations</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {recommendations.map((rec, index) => (
-              <div key={index} className="p-4 rounded-lg bg-secondary/50 border border-border">
+              <div key={index} className="p-4 rounded-lg glass border border-white/10">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <h4 className="font-medium">{rec.title}</h4>
+                    <h4 className="font-medium text-white">{rec.title}</h4>
                     <p className="text-sm text-muted-foreground">{rec.description}</p>
-                    <Badge variant="secondary" className="text-xs">{rec.impact}</Badge>
+                    <Badge variant="secondary" className="text-xs bg-white/10 text-white">{rec.impact}</Badge>
                   </div>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" className="glass-button">
                     {rec.action}
                   </Button>
                 </div>
@@ -313,17 +398,17 @@ const Dashboard = () => {
 
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="text-white">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {activities.map((activity, index) => (
               <div key={index} className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-clen-green rounded-full mt-2"></div>
                 <div className="flex-1 space-y-1">
-                  <p className="text-sm">{activity.description}</p>
+                  <p className="text-sm text-white">{activity.description}</p>
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">{activity.time}</p>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs bg-white/10 text-white">
                       {activity.impact}
                     </Badge>
                   </div>
