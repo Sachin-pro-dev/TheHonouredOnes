@@ -1,45 +1,39 @@
 
-// Smart Contract ABIs and Addresses
+import { Abi } from 'viem';
+import MockUSDC_ABI from '@/ABI/MockUSDC.json';
+import LendingPool_ABI from '@/ABI/LendingPool.json';
+import CreditVoucherNFT_ABI from '@/ABI/CreditVoucherNFT.json';
+
+// Base Sepolia testnet contract addresses
+export const CONTRACT_ADDRESSES = {
+  // MockUSDC deployed on Base Sepolia
+  MockUSDC: '0x5B8453FD96ED80Db7894450b960d284d860b7350',
+  // LendingPool deployed on Base Sepolia
+  LendingPool: '0xF26b489f44481069670d410639e1849708E8b7F5',
+  // CreditVoucherNFT deployed on Base Sepolia
+  CreditVoucherNFT: '0xe469a1303f5954892FD9f03D2213237e84824667'
+} as const;
+
+// Contract ABIs with TypeScript types
 export const CONTRACTS = {
   MockUSDC: {
-    address: '0x...', // Replace with actual deployed address
-    abi: [
-      "function faucet() external",
-      "function balanceOf(address account) external view returns (uint256)",
-      "function approve(address spender, uint256 amount) external returns (bool)",
-      "function allowance(address owner, address spender) external view returns (uint256)",
-      "function decimals() external view returns (uint8)",
-      "function transfer(address to, uint256 amount) external returns (bool)"
-    ]
+    address: CONTRACT_ADDRESSES.MockUSDC as `0x${string}`,
+    abi: MockUSDC_ABI.abi as Abi
   },
   LendingPool: {
-    address: '0x...', // Replace with actual deployed address
-    abi: [
-      "function deposit(uint256 amount) external",
-      "function withdraw(uint256 amount) external",
-      "function requestCredit(uint8 tier) external returns (uint256)",
-      "function repay(uint256 voucherId, uint256 amount) external",
-      "function getPoolStats() external view returns (uint256 totalDeposits_, uint256 totalBorrowed_, uint256 totalRepaid_, uint256 availableLiquidity)",
-      "function getCurrentDebt(uint256 voucherId) external view returns (uint256)",
-      "function getUserVoucherInfo(address user) external view returns (uint256 voucherId, uint8 tier, uint256 limit, uint256 utilized, uint256 debt)",
-      "function userDeposits(address user) external view returns (uint256)",
-      "function pause() external",
-      "function unpause() external",
-      "function paused() external view returns (bool)"
-    ]
+    address: CONTRACT_ADDRESSES.LendingPool as `0x${string}`,
+    abi: LendingPool_ABI.abi as Abi
   },
   CreditVoucherNFT: {
-    address: '0x...', // Replace with actual deployed address
-    abi: [
-      "function getUserVoucher(address user) external view returns (uint256)",
-      "function getVoucher(uint256 tokenId) external view returns (uint8 tier, uint256 limit, uint256 utilized)",
-      "function getAvailableCredit(uint256 tokenId) external view returns (uint256)",
-      "function tierLimits(uint8 tier) external view returns (uint256)",
-      "function tokenURI(uint256 tokenId) external view returns (string)",
-      "function setLendingPool(address lendingPool) external"
-    ]
+    address: CONTRACT_ADDRESSES.CreditVoucherNFT as `0x${string}`,
+    abi: CreditVoucherNFT_ABI.abi as Abi
   }
-};
+} as const;
+
+// Type exports for better type safety
+export type ContractName = keyof typeof CONTRACTS;
+export type ContractAddress = `0x${string}`;
+export type ContractABI = Abi;
 
 // USDC utilities
 export const USDC_DECIMALS = 6;

@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 /* CLen Design System - Modern, Elegant, Sleek */
 
@@ -82,9 +82,7 @@
     --input: 0 0% 8%;
     --ring: 142 76% 55%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -245,16 +243,5 @@
   }
   to {
     box-shadow: 0 0 30px hsl(var(--clen-green) / 0.4);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    background: #000000;
   }
 }
