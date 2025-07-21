@@ -1,184 +1,186 @@
+# 🇮🇳 Agentic Ethereum Hackathon India
 
-# 🇮🇳 Agentic Ethereum Hackathon India  
-## 🛠 CLen — The Honoured Ones
+<div align="center">
 
-Welcome to our submission for the **Agentic Ethereum Hackathon** organized by **Reskilll** & **Geodework**! This repository contains our project code, technical documentation, architecture overview, and all related assets.
+**🛠 Project Title** – **CLEN**  
+**👥 Team** – **The Honoured Ones**
 
----
-
-## 📌 Problem Statement  
-
-**Challenge:** *"DeFi + Financial Inclusion Agents  
-Automate DeFi strategies focused on microfinance, rural savings, credit scoring, remittance flows using Ethereum-based protocols."*
-
-> Over 1.2 billion Web3 users lack access to fair credit.  
-> Current DeFi protocols require 150–200% overcollateralization.  
-> Traditional banks demand paperwork, salary slips, and long histories.  
-> There's no standardized credit scoring for Web3 users across chains.
-
-This leaves freelancers, DAO workers, and crypto-natives financially invisible — despite having strong on-chain reputations.
-
----
-## 📎 Links
-
-- 🎞️ [Demo Video](https://youtu.be/your-demo-link)  
-- 🌐 [Website](https://clen.xyz)  
-- 📊 [Presentation Slides (Canava)]([https://drive.google.com/your-ppt-link](https://www.canva.com/design/DAGsOPaFjGs/Wl-5-yC8Vr13GeZVf0pqAA/edit?utm_content=DAGsOPaFjGs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton))
+**Sachin** (Blockchain + Product)  
+**Rahul Jadvani** (Frontend Lead)  
+**Sai Jadhav** (ZK + Smart Contracts)  
+**Prathiksha** (AI + Agent Design)
 
 ---
 
-## 💡 Our Solution – CLen (Credit Layer for Ethereum Natives)
-
-**CLen** is an **AI-powered, blockchain-native credit protocol** that lets users turn their DeFi activity into real credit — without any traditional paperwork or collateral.
-
-- AI analyzes wallet behavior, lending patterns, and DeFi activity  
-- A **Credit Voucher NFT** is issued representing their score & credit capacity  
-- Users get undercollateralized loans backed only by their **Voucher NFT**  
-- Smart contracts manage loan disbursement, repayments, and defaults
-
-> 💡 “Finally, a system that understands that my blockchain activity **IS** my credit history.” — *Arjun, CLen User*
+*Welcome to our submission for the Agentic Ethereum Hackathon by Reskilll & Geodework!*  
+*This repository includes our project code, documentation, and related assets.*
 
 ---
 
-## 🔥 Real-World Impact – Meet Arjun
+</div>
 
-Arjun, a 24-year-old freelance DeFi developer, needed ₹25,000 upfront for tools and expenses before his 3-month project started.
+## 📽 **Demo**
 
-❌ Traditional banks rejected him — no payslips  
-❌ DeFi loans wanted ₹37,500 collateral  
-✅ CLEN approved him based on 18 months of DeFi activity  
-✅ He received ₹25,000 loan at 14% APR with a **Silver Credit Voucher NFT**
-
-**Result:** Arjun repaid the loan in 2.5 months and moved to the **Gold Tier**
-
----
-
-## 🧱 Tech Stack
-
-### 💻 Frontend  
-- React.js  
-- Tailwind CSS  
-- Shadcn UI  
-- Accternity  
-- RainbowKit / wagmi  
-
-### 🔧 Backend  
-- Node.js  
-- Express.js  
-- Circom / SnarkJS (ZK Proofs)  
-- Polygon ID / Anon Aadhaar SDK  
-
-### 🧠 AI Layer  
-- Gemini 1.5 Pro  
-- OpenAI (Fallback LLM)  
-- Base AgentKit (Autonomous Assistant “Laxmi”)  
-
-### ⛓ Blockchain  
-- Ethereum (Base Sepolia for testnet)  
-- Solidity (CreditVoucherNFT + LoanManager contracts)  
-- Foundry (Dev + Testing Framework)  
-
-### 🗃 Storage & Infra  
-- Firebase (Auth, Firestore)  
-- IPFS (NFT Metadata)  
-- DigiLocker (for future document validation)  
-
-### 🚀 Hosting  
-- Vercel (Frontend)  
-- Render (Backend)
+| Resource | Link |
+|----------|------|
+| 🎥 **Video Demo** | [Google Drive](https://drive.google.com/drive/folders/14ZPRIkfOi14QtWcPNzk_S_JCa9WMjNx0?usp=sharing) |
+| 🖥 **Live Application** | [the-honoured-ones.vercel.app](https://the-honoured-ones.vercel.app/) |
+| 📊 **Presentation** | [Canva Presentation](https://www.canva.com/design/DAGsOPaFjGs/Wl-5-yC8Vr13GeZVf0pqAA/edit?utm_content=DAGsOPaFjGs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton) |
 
 ---
 
-## 🤖 Laxmi — The AI Credit Assistant  
+## 📌 **Problem Statement**
 
-We built **Laxmi**, an AI agent who can:
+### Challenge Addressed: **"DeFi + Financial Inclusion Agents"**
 
-- Answer user queries in natural language  
-- Analyze loan history & credit score  
-- Guide through loan requests  
-- Execute on-chain tasks (payments, balance checks, voucher upgrades)
-
-Built using **Gemini API + Base AgentKit**  
-Accessible at: `/laxmi`
+> 🚨 **The Crisis:**
+> - **1.2B+** users — especially in the Global South — are locked out of credit access
+> - **$100B+** in DeFi liquidity exists, yet due to **150–200%** overcollateralization, the majority can't borrow
+> - **No standardized, portable reputation layer** across chains
+> - Credit invisibility and lack of real-world identity solutions compound the exclusion
 
 ---
 
-## 📽 Demo  
+## 💡 **Our Solution**
 
-🎥 **Video Demo:** [https://youtu.be/your-demo-link](https://youtu.be/your-demo-link)  
-🌐 **Live App (optional):** [https://clen.xyz](https://clen.xyz)
+<div align="center">
+
+### **CLEN** *(Credit Layer for Everyone Native to Web3)*
+
+**India's Web3-native credit card layer that allows undercollateralized lending**
+
+</div>
+
+CLEN leverages:
+- 🤖 **AI-powered credit agents**
+- 🎫 **NFT-based Credit Vouchers**  
+- 🔐 **ZK identity**
+- 🏆 **SBT-based scoring**
+
+**🎯 Target Users:** DeFi farmers, NFT creators, DAOs, traders — crypto-active but credit-invisible
+
+**💥 Impact:** Solves the **overcollateralization trap** in Web3 and creates a **portable, composable, and privacy-preserving credit layer** for **400M+** underbanked users in India
 
 ---
 
-## 📂 Repository Structure
+## 🧱 **Tech Stack**
+
+| Category | Technologies |
+|----------|-------------|
+| 🖥 **Frontend** | React.js, Tailwind CSS |
+| ⚙ **Backend** | Node.js, Express.js |
+| 🧠 **AI** | LLM-based scoring agent (Llama 3 + scoring heuristics), LangChain for agent routing |
+| 🔗 **Blockchain** | Ethereum, Base, Polygon, Solidity, Chainlink, Superfluid |
+| 🔍 **DB/Storage** | Firebase, IPFS, Wallet activity APIs |
+| 🚀 **Hosting** | Vercel (Frontend), Render (Backend) |
+
+---
+
+## 📂 **Repository Structure**
 
 ```
-
-clen/
-├── contracts/               # Smart Contracts
-│   └── CreditVoucherNFT.sol
-│   └── LoanManager.sol
-├── frontend/                # React App
-│   ├── components/
-│   ├── pages/
-│   ├── utils/
-│   └── tailwind.config.js
-├── backend/                 # Express Backend
-│   ├── routes/
-│   ├── controllers/
-│   ├── ai/                  # Gemini / AgentKit logic
-├── zk/                      # ZK Proof Circuits
-│   └── identity.circom
-│   └── verification\_keys/
-├── public/                  # Static Assets
-├── README.md
-└── package.json
-
+.
+├── src/                    # Main React.js frontend application
+│   ├── components/         # UI components including web3 forms
+│   ├── pages/             # Application pages and routes
+│   ├── contexts/          # React contexts (Web3Provider)
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Utility libraries and configurations
+│   ├── ABI/               # Smart contract ABIs
+│   ├── assets/            # Product images and static assets
+│   └── utils/             # Utility functions and network configs
+├── CLEN3/                 # Next.js application (agent interface)
+│   └── app/               # Next.js app directory structure
+├── public/                # Static assets for the main app
+├── package.json           # Main project dependencies
+├── vite.config.ts         # Vite configuration
+├── tailwind.config.ts     # Tailwind CSS configuration
+└── README.md              # Project overview and documentation
 ```
 
 ---
 
-## 🌍 Real Use Cases Across Web3 Ecosystem
+## 🔐 **Core Features**
 
-### 👨‍💻 Arjun – Freelance Developer  
-Loan: ₹25K | Tier: Silver | APR: 14% | Result: Repaid in 2.5 months → Gold
-
-### 🎨 Priya – NFT Artist  
-Loan: ₹1K | Tier: Bronze | Community attestations helped qualify
-
-### 🏛 DevDAO – Collective Lending  
-Loan: $25K | 50 contributors pooled their vouchers
-
-### 🔄 Sarah – Cross-Chain Trader  
-Loan: $10K | Tier: Gold | DeFi across 5 chains → CLen unified score
+| Feature | Description |
+|---------|-------------|
+| ✅ **ZK Aadhaar Verification** | Identity without revealing sensitive data |
+| 🧠 **AI Credit Scoring Agent** | Wallet history + DeFi activity → Score (300–850) |
+| 🪙 **Credit Voucher NFTs** | Upgradeable, tradable NFTs representing credit access |
+| 🧾 **SBT Credit Profiles** | On-chain, cross-protocol credit reputation |
+| 💸 **Spend Now, Pay Later** | Repay with EMI or no collateral |
+| 🎙️ **Laxmi Chatbot** | Voice-based UX for Bharat users in local languages |
+| 🔗 **Cross-chain Support** | Aggregates data from Base, Polygon, and others |
 
 ---
 
-## 📈 Protocol Economics & $CLEN Token
+## 📊 **Real Use Cases**
 
-- **Loan Origination Fee:** 2-3%  
-- **Interest Spread:** 2–4% per loan  
-- **Voucher Upgrade Fee:** $10–$50  
-- **Data Insights & APIs:** For partner protocols  
-- **Token Utilities:**  
-  - Governance rights  
-  - LP rewards  
-  - Credit score boosts  
-  - Fee discounts  
-  - Default protection pools
+### 🌾 **Arjun – DeFi Yield Farmer**
+- **Need:** ₹3K for farming strategy
+- **Outcome:** AI risk flagged low → Silver Voucher → Full repayment → Gold Upgrade
+
+### 🎨 **Priya – NFT Creator**
+- **Need:** ₹1K for tools
+- **Outcome:** Community attestations → Bronze Voucher → Inclusive lending
+
+### 👥 **Dev DAO – 50-member Collective**
+- **Need:** ₹25K for hackathon sponsorship
+- **Outcome:** Pooled vouchers → Large loan based on DAO trust
+
+### 💹 **Sarah – Cross-Chain Trader**
+- **Need:** $10K liquidity buffer
+- **Outcome:** Gold Voucher at 8% APR → Based on multi-chain reputation
 
 ---
 
-## 🧑‍💻 Team – *The Honoured Ones*  
-- **Sachin** (Blockchain + Product)  
-- **Rahul Jadvani** (Frontend Lead)  
-- **Sai Jadhav** (ZK + Smart Contracts)  
-- **Prathiksha** (AI + Agent Design)
+## 💰 **Revenue Model**
+
+| Revenue Stream | Rate/Fee |
+|----------------|----------|
+| 💼 **Credit Origination Fees** | 2–3% |
+| 📈 **Borrower Interest Income** | 12–24% APR (dynamic) |
+| 🏦 **Liquidity Provider Fees** | Yield on staked credit pool |
+| 🔗 **SBT API Access (B2B)** | Credit scoring for partner protocols |
+| 🎁 **Merchant Cashback Split** | 10% to user, 2% to protocol |
+| 🤖 **Premium Agent Services** | Subscriptions or pay-per-use |
+
+---
+
+## 🪙 **Token Utility & Tokenomics**
+
+### **CLEN Token Utility:**
+- 🗳️ **Governance** over protocol parameters
+- 🏦 **Staking** for LPs and default risk pool
+- ⬆️ **Tier upgrades** & perks
+- 🧠 **Agent service** access + rewards
+
+### **Tokenomics Snapshot:**
+| Metric | Value |
+|--------|-------|
+| 💹 **Net Interest Margin** | 6–8% |
+| 🎯 **Staking Yield** | 8–15% |
+| 📊 **Token Inflation** | 2–3% annually |
+| 🛡️ **Default Reserve** | 3–5% |
+
+---
+
+## 🏁 **Why CLEN Wins**
+
+<div align="center">
+
+| ✅ | **Winning Factor** |
+|----|--------------------|
+| 🎯 | Solves a **real, large-scale problem** (financial inclusion) |
+| 🌐 | Credit model designed **natively for Web3** |
+| 🤖 | **AI-first**, privacy-preserving, and chain-agnostic |
+| 🧩 | **Modular architecture** + composable with existing DeFi |
+| 🗣️ | **Voice-first UX** designed for mass Bharat adoption |
+
+</div>
 
 ---
 
 
 
 ### 🚀 “CLen is building the missing credit layer of Web3 — where your reputation, not your collateral, unlocks financial access”
-```
-
