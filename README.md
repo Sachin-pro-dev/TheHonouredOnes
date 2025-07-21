@@ -5,10 +5,10 @@
 **🛠 Project Title** – **CLEN**  
 **👥 Team** – **The Honoured Ones**
 
-**Sachin Baluragi** 
-**Rahul Jadvani**  
+**Sachin Baluragi**   
+**Rahul Jadvani**   
 **Sai Jadhav**  
-**Prathiksha**
+**Prathiksha**   
 
 ---
 
