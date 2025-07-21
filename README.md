@@ -5,10 +5,10 @@
 **🛠 Project Title** – **CLEN**  
 **👥 Team** – **The Honoured Ones**
 
-**Sachin** (Blockchain + Product)  
-**Rahul Jadvani** (Frontend Lead)  
-**Sai Jadhav** (ZK + Smart Contracts)  
-**Prathiksha** (AI + Agent Design)
+**Sachin Baluragi** 
+**Rahul Jadvani**  
+**Sai Jadhav**  
+**Prathiksha**
 
 ---
 
